@@ -5,31 +5,33 @@ import asyncio
 import numpy as np
 
 async def async_screen_shot():
-    print('screen shot', time.time(), )
+    print('screen shot taking', time.time(), )
     myScreenshot = pyautogui.screenshot().resize((1280, 800))
     np.array(myScreenshot)
 
 async def async_record_event(fps):
     queue = []
     keyboard.start_recording(recorded_events_queue=queue)
-    await asyncio.sleep(1/fps)
+    await asyncio.sleep(1 / fps)
+
+    # await asyncio.sleep(1/fps)
     queue = keyboard.stop_recording()
     for event in queue:
         print(event.name, event.event_type, event.time, )
 
 
-def record(fps=50):
+async def record(fps=50):
     while True:
-        # asyncio.run(async_record_event(fps))
         queue = []
+        sreen_task = asyncio.create_task(async_screen_shot())
+        # keyboard_task = asyncio.create_task(async_record_event(fps))
         keyboard.start_recording(recorded_events_queue=queue)
-        asyncio.run(async_screen_shot())
-        # time.sleep(1/fps)
+        await asyncio.sleep(1/fps)
+        await sreen_task
+        # await keyboard_task
         queue = keyboard.stop_recording()
         for event in queue:
             print(event.name, event.event_type, event.time, )
-        # await asyncio.sleep(1/fps)
-
 
 
 
@@ -38,4 +40,4 @@ def record(fps=50):
 
 
 if __name__ == "__main__":
-    record(fps=20)
+    asyncio.run(record(fps=5))
