@@ -18,3 +18,4 @@ keyDown('tab')
 time.sleep(0.1)
 keyUp('tab')
 keyUp('command')
+
