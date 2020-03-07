@@ -1,6 +1,6 @@
-import keyboard
+import keyboard, pyautogui
+import subprocess
 import time
-import pyautogui
 import asyncio
 import numpy as np
 
@@ -13,15 +13,19 @@ async def async_record_event(fps):
     queue = []
     keyboard.start_recording(recorded_events_queue=queue)
     await asyncio.sleep(1 / fps)
-
-    # await asyncio.sleep(1/fps)
+    # time.sleep(1/fps)
     queue = keyboard.stop_recording()
     for event in queue:
         print(event.name, event.event_type, event.time, )
 
 
 async def record(fps=50):
+    iter = 0
     while True:
+        iter += 1
+        if iter % 100 == 0:
+            subprocess.Popen(['./clean_tmp.sh'], shell=True)
+            iter = 0
         queue = []
         sreen_task = asyncio.create_task(async_screen_shot())
         # keyboard_task = asyncio.create_task(async_record_event(fps))
@@ -40,4 +44,4 @@ async def record(fps=50):
 
 
 if __name__ == "__main__":
-    asyncio.run(record(fps=5))
+    asyncio.run(record(fps=2))
