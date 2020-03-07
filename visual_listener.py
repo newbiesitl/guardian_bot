@@ -18,6 +18,10 @@ async def async_record_event(fps):
     for event in queue:
         print(event.name, event.event_type, event.time, )
 
+async def print_events(events):
+    for event in events:
+        print(event.name, event.event_type, event.time, )
+
 
 async def record(fps=50):
     iter = 0
@@ -34,8 +38,12 @@ async def record(fps=50):
         await sreen_task
         # await keyboard_task
         queue = keyboard.stop_recording()
-        for event in queue:
-            print(event.name, event.event_type, event.time, )
+        print_events(queue)
+        # for event in queue:
+        #     print(event.name, event.event_type, event.time, )
+
+
+
 
 
 
