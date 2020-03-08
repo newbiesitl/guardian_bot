@@ -1,41 +1,39 @@
 import time, sys
 import pyautogui, keyboard, io
 import asyncio
-from multiprocessing import Process
 import requests
 import subprocess, threading
-import numpy as np
 
 MAX_FPS = 5
 image_upload_url = 'http://127.0.0.1:8000/uploadfile'
 event_url = 'http://127.0.0.1:8000/event'
 
 def async_screen_shot():
-    start_time = time.time()
-    myScreenshot = pyautogui.screenshot().resize((640, 480))
-    imgByteArr = io.BytesIO()
-    myScreenshot.save(imgByteArr, format='PNG')
-    imgByteArr = imgByteArr.getvalue()
-    files = {'file': imgByteArr}
-    params = {'ts': start_time}
-    # ,
-    r = requests.post(image_upload_url, files=files, params=params)
-    print(r.json())
-    end_time = time.time()
-    print('screen shot taking %.3f finish at %.3f time take %.3f' % (start_time, end_time, end_time-start_time) )
+    try:
+        start_time = time.time()
+        myScreenshot = pyautogui.screenshot().resize((640, 480))
+        imgByteArr = io.BytesIO()
+        myScreenshot.save(imgByteArr, format='PNG')
+        imgByteArr = imgByteArr.getvalue()
+        files = {'file': imgByteArr}
+        params = {'ts': start_time}
+        r = requests.post(image_upload_url, files=files, params=params)
+        print(r.json())
+        end_time = time.time()
+        print('screen shot taking %.3f finish at %.3f time take %.3f' % (start_time, end_time, end_time - start_time))
+    except KeyboardInterrupt:
+        raise KeyboardInterrupt
+    except Exception as e:
+        print(e)
+
 
 
 def event_loop(fps=30, e_type='screenshot', verbose=False):
     iter = 1
     while True:
         if e_type == 'screenshot':
-            try:
-                worker = threading.Thread(target=async_screen_shot())
-                worker.start()
-            except KeyboardInterrupt:
-                raise KeyboardInterrupt
-            except FileNotFoundError:
-                continue
+            worker = threading.Thread(target=async_screen_shot())
+            worker.start()
         elif e_type == 'keyboard':
             worker = threading.Thread(target=async_record_event(1/fps, verbose))
             worker.start()
