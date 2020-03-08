@@ -34,17 +34,18 @@ def event_loop(fps=30, e_type='screenshot', verbose=False):
         if e_type == 'screenshot':
             worker = threading.Thread(target=async_screen_shot())
             worker.start()
+            iter += 1
+            if iter % 100 == 0:
+                sub_p = subprocess.Popen(['./clean_tmp.sh'], shell=True)
+                iter = 0
+                sub_p.wait()
         elif e_type == 'keyboard':
-            worker = threading.Thread(target=async_record_event(1/fps, verbose))
+            worker = threading.Thread(target=keyboard_listener(1 / fps, verbose))
             worker.start()
         else:
             raise ValueError('unknown type %s', e_type)
         # worker.join()
-        iter += 1
-        if iter % 100 == 0:
-            sub_p = subprocess.Popen(['./clean_tmp.sh'], shell=True)
-            iter = 0
-            sub_p.wait()
+
 
 
 async def process_event(queue, verbose=False):
@@ -64,7 +65,7 @@ async def process_event(queue, verbose=False):
             print('exception sending event', payload)
 
 
-def async_record_event(time_window, verbose=False):
+def keyboard_listener(time_window, verbose=False):
     queue = []
     keyboard.start_recording(recorded_events_queue=queue)
     time.sleep(time_window)
