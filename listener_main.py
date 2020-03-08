@@ -9,6 +9,7 @@ import numpy as np
 MAX_FPS = 5
 
 
+
 def async_screen_shot():
     start_time = time.time()
     myScreenshot = pyautogui.screenshot().resize((1280, 800))
@@ -37,8 +38,6 @@ def event_loop(e_type='screenshot', verbose=False):
 
 
 async def process_event(queue, verbose=False):
-    # keyboard.play(queue)
-
     for event in queue:
         if verbose:
             print(event.name, event.event_type, event.time, )
@@ -48,8 +47,12 @@ async def process_event(queue, verbose=False):
             'ts': event.time,
             'event_type': event.event_type,
         }
-        r = requests.get('http://127.0.0.1:8000/event', params=payload)
-        print(r.json())
+        try:
+            r = requests.get('http://127.0.0.1:8000/event', params=payload)
+            print('num items in queue %d' % r.json()['num items in queue'])
+        except:
+            print('exception sending event', payload)
+
 
 def async_record_event(time_window, verbose=False):
     queue = []

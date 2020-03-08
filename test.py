@@ -1,16 +1,11 @@
-import asyncio
-import time
+from collections import OrderedDict
 
-async def t1():
-    time.sleep(2)
-    print('t1')
-async def t2():
-    time.sleep(1)
-    print('t2')
-async def main():
-    t11 = asyncio.create_task(t1())
-    t22 = asyncio.create_task(t2())
-    await t11
-    await t22
+od = OrderedDict()
 
-asyncio.run(main())
+od[3] = 3
+od[1] = 1
+od[4] = 4
+od.pop(1)
+od[1] = 1
+od[5] = {'d':3}
+print(tuple(od.items())[3][0])
