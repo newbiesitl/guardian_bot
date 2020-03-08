@@ -23,23 +23,37 @@ async def create_upload_file(ts: float, file: bytes = File(...)):
     global PREV_TS
     global od
     # pop events older than prev_ts
+    event_queue = []
+    payload = {}
+
+    if PREV_IMG is None:
+        image = Image.open(io.BytesIO(file))
+        PREV_IMG = image
+        payload['image'] = image
+        return {'num events': len(event_queue), 'image type': str(type(payload['image']))}
     while True:
-        event_queue = []
         if len(od) == 0:
+            payload['image'] = PREV_IMG
+            PREV_TS = ts
+            image = Image.open(io.BytesIO(file))
+            PREV_IMG = image
             break
         first_event = tuple(od.items())[0]
         first_event_time = first_event[0]
-        print(first_event_time)
         if first_event_time < PREV_TS:
             od.pop(first_event_time)
         elif PREV_TS < first_event_time < PREV_TS + event_window_size:
             event_queue.append(od.pop(first_event_time))
         elif PREV_TS + event_window_size < first_event_time:
             # emit the payload here
+            payload['image'] = PREV_IMG
             PREV_TS = ts
             image = Image.open(io.BytesIO(file))
             PREV_IMG = image
-            return {"return items": len(event_queue)}
+            break
+    payload['events'] = event_queue
+    # return {'image type': type(payload['image']), 'num events': len(event_queue)}
+    return {'num events': len(event_queue), 'image type': str(type(payload['image']))}
 
 
 

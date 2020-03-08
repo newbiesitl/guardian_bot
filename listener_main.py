@@ -19,7 +19,7 @@ def async_screen_shot():
     files = {'file': imgByteArr}
     params = {'ts': start_time}
     # ,
-    r = requests.post(image_upload_url, files=files)
+    r = requests.post(image_upload_url, files=files, params=params)
     print(r.json())
     end_time = time.time()
     print('screen shot taking %.3f finish at %.3f time take %.3f' % (start_time, end_time, end_time-start_time) )
