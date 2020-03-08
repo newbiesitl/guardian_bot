@@ -1,5 +1,5 @@
 import time, sys
-import pyautogui, keyboard
+import pyautogui, keyboard, io
 import asyncio
 from multiprocessing import Process
 import requests
@@ -9,11 +9,21 @@ import numpy as np
 MAX_FPS = 5
 
 
-
 def async_screen_shot():
     start_time = time.time()
     myScreenshot = pyautogui.screenshot().resize((1280, 800))
-    np.array(myScreenshot)
+    imgByteArr = io.BytesIO()
+    myScreenshot.save(imgByteArr, format='PNG')
+    imgByteArr = imgByteArr.getvalue()
+    # print(type(myScreenshot))
+    # print(dir(myScreenshot))
+    # print(myScreenshot.width, myScreenshot.height)
+    # np.array(myScreenshot)
+    url = 'http://127.0.0.1:8000/uploadfile'
+    files = {'file': imgByteArr}
+    values = {'ts': start_time}
+    r = requests.post(url, files=files, data=values)
+    print(r.json())
     end_time = time.time()
     print('screen shot taking %.3f finish at %.3f time take %.3f' % (start_time, end_time, end_time-start_time) )
 
