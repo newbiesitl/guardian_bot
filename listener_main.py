@@ -7,7 +7,8 @@ import subprocess, threading
 import numpy as np
 
 MAX_FPS = 5
-
+image_upload_url = 'http://127.0.0.1:8000/uploadfile'
+event_url = 'http://127.0.0.1:8000/event'
 
 def async_screen_shot():
     start_time = time.time()
@@ -15,14 +16,9 @@ def async_screen_shot():
     imgByteArr = io.BytesIO()
     myScreenshot.save(imgByteArr, format='PNG')
     imgByteArr = imgByteArr.getvalue()
-    # print(type(myScreenshot))
-    # print(dir(myScreenshot))
-    # print(myScreenshot.width, myScreenshot.height)
-    # np.array(myScreenshot)
-    url = 'http://127.0.0.1:8000/uploadfile'
     files = {'file': imgByteArr}
     values = {'ts': start_time}
-    r = requests.post(url, files=files, data=values)
+    r = requests.post(image_upload_url, files=files, data=values)
     print(r.json())
     end_time = time.time()
     print('screen shot taking %.3f finish at %.3f time take %.3f' % (start_time, end_time, end_time-start_time) )
@@ -31,20 +27,23 @@ def async_screen_shot():
 def event_loop(e_type='screenshot', verbose=False):
     iter = 1
     while True:
-        iter += 1
-        if iter % 100 == 0:
-            subprocess.Popen(['./clean_tmp.sh'], shell=True)
-            iter = 0
         if e_type == 'screenshot':
-            worker = threading.Thread(target=async_screen_shot())
-            worker.start()
+            try:
+                worker = threading.Thread(target=async_screen_shot())
+                worker.start()
+            except:
+                continue
         elif e_type == 'keyboard':
             worker = threading.Thread(target=async_record_event(0.5, verbose))
             worker.start()
         else:
             raise ValueError('unknown type %s', e_type)
         worker.join()
-
+        iter += 1
+        if iter % 100 == 0:
+            sub_p = subprocess.Popen(['./clean_tmp.sh'], shell=True)
+            iter = 0
+            sub_p.wait()
 
 
 async def process_event(queue, verbose=False):
@@ -58,7 +57,7 @@ async def process_event(queue, verbose=False):
             'event_type': event.event_type,
         }
         try:
-            r = requests.get('http://127.0.0.1:8000/event', params=payload)
+            r = requests.get(event_url, params=payload)
             print('num items in queue %d' % r.json()['num items in queue'])
         except:
             print('exception sending event', payload)
