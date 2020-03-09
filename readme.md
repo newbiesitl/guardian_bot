@@ -15,6 +15,6 @@ kill them
 
 # run client
 
-`python listener_main.py screenshot`
+`python worker_client.py screenshot`
 
-`python listener_main.py keyboard`
+`python worker_client.py keyboard`
