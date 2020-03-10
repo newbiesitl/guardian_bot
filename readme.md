@@ -6,7 +6,7 @@
 - `pip install pillow`
 
 # run server
-uvicorn web_api:app
+uvicorn worker_client:app
 
 list all ports ps
 `lsof -i:8000`
@@ -18,3 +18,7 @@ kill them
 `python worker_client.py screenshot`
 
 `python worker_client.py keyboard`
+
+
+# api doc location
+http://127.0.0.1:8000/docs
