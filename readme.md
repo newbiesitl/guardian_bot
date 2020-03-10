@@ -1,5 +1,6 @@
 # dependency
 - `conda install numpy`
+- `conda install aiofiles`
 - `pip install keyboard`
 - `conda install -c conda-forge pyautogui`
 - `pip install fastapi`

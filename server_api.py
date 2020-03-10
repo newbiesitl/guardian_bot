@@ -2,10 +2,18 @@ from fastapi import FastAPI, File, UploadFile
 from collections import OrderedDict
 from pydantic import BaseModel
 import time, io
+
+from starlette.responses import FileResponse
+from starlette.middleware.cors import CORSMiddleware
+from starlette.responses import StreamingResponse
+from typing import List
+import tempfile
 import numpy as np
 from PIL import Image
 app = FastAPI()
-
+app.add_middleware(
+    CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"]
+)
 event_window_size = 1.0 # 1 sec
 event_right_window = -1.0
 event_left_window = -1.0
@@ -18,6 +26,7 @@ app = FastAPI()
 PREV_IMG_FILE = None
 PREV_TS = -1
 PAYLOAD_QUEUE = []
+FILE_PTR = "FILE"
 PAYLOAD_QUEUE_MAX_SIZE = 100 # 100 frames
 
 @app.post("/uploadfile/")
@@ -33,12 +42,12 @@ async def create_upload_file(ts: float, file: bytes = File(...)):
         # PREV_IMG = image
         PREV_IMG_FILE = file
         # payload['image'] = image
-        payload['img_file'] = file
-        return {'num events': len(event_queue), 'image type': str(type(payload['image']))}
+        payload[FILE_PTR] = file
+        return {'num events': len(event_queue), 'image type': str(type(payload[FILE_PTR]))}
     while True:
         if len(od) == 0:
             # payload['image'] = PREV_IMG
-            payload['img_file'] = PREV_IMG_FILE
+            payload[FILE_PTR] = PREV_IMG_FILE
             PREV_TS = ts
             # image = Image.open(io.BytesIO(file))
             # PREV_IMG = image
@@ -53,7 +62,7 @@ async def create_upload_file(ts: float, file: bytes = File(...)):
         elif PREV_TS + event_window_size < first_event_time:
             # emit the payload here
             # payload['image'] = PREV_IMG
-            payload['image_file'] = PREV_IMG_FILE
+            payload[FILE_PTR] = PREV_IMG_FILE
             PREV_TS = ts
             # image = Image.open(io.BytesIO(file))
             # PREV_IMG = image
@@ -67,18 +76,24 @@ async def create_upload_file(ts: float, file: bytes = File(...)):
         PAYLOAD_QUEUE.pop(0)
     return {'num events of frame': len(event_queue), 'total event in queue': (len(PAYLOAD_QUEUE))}
 
-class TrainSample(BaseModel):
-    file: bytes = File(...)
-    seq: list = []
+from typing import Union
+
 
 @app.put("/get_one_sample/")
-async def get_one_sample():
-    item = TrainSample()
+def get_one_sample():
     global PAYLOAD_QUEUE
+    if len(PAYLOAD_QUEUE) == 0:
+        return {
+            'error': "empty queue"
+        }
     last_sample = PAYLOAD_QUEUE.pop(0)
-    item.seq = last_sample['events']
-    item.file = last_sample['img_file']
-    return item
+    item_seq = last_sample['events']
+    item_file = last_sample[FILE_PTR]
+    with tempfile.NamedTemporaryFile(mode="w+b", suffix=".png", delete=True) as FOUT:
+        FOUT.write(item_file)
+        return {'events': item_seq,
+                'file': FileResponse(FOUT.name, media_type="image/png"),
+                }
 
 @app.get("/event/")
 async def read_item(name: str, ts: float, event_type: str):
