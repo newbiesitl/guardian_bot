@@ -1,5 +1,6 @@
 from fastapi import FastAPI, File, UploadFile
 from collections import OrderedDict
+from pydantic import BaseModel
 import time, io
 import numpy as np
 from PIL import Image
@@ -14,29 +15,34 @@ od = OrderedDict()
 QUEUE_MAX_LEN = 100
 app = FastAPI()
 
-PREV_IMG = None
+PREV_IMG_FILE = None
 PREV_TS = -1
+PAYLOAD_QUEUE = []
+PAYLOAD_QUEUE_MAX_SIZE = 100 # 100 frames
 
 @app.post("/uploadfile/")
 async def create_upload_file(ts: float, file: bytes = File(...)):
-    global PREV_IMG
     global PREV_TS
+    global PREV_IMG_FILE
     global od
     # pop events older than prev_ts
     event_queue = []
     payload = {}
-
-    if PREV_IMG is None:
-        image = Image.open(io.BytesIO(file))
-        PREV_IMG = image
-        payload['image'] = image
+    if PREV_IMG_FILE is None:
+        # image = Image.open(io.BytesIO(file))
+        # PREV_IMG = image
+        PREV_IMG_FILE = file
+        # payload['image'] = image
+        payload['img_file'] = file
         return {'num events': len(event_queue), 'image type': str(type(payload['image']))}
     while True:
         if len(od) == 0:
-            payload['image'] = PREV_IMG
+            # payload['image'] = PREV_IMG
+            payload['img_file'] = PREV_IMG_FILE
             PREV_TS = ts
-            image = Image.open(io.BytesIO(file))
-            PREV_IMG = image
+            # image = Image.open(io.BytesIO(file))
+            # PREV_IMG = image
+            PREV_IMG_FILE = file
             break
         first_event = tuple(od.items())[0]
         first_event_time = first_event[0]
@@ -46,20 +52,33 @@ async def create_upload_file(ts: float, file: bytes = File(...)):
             event_queue.append(od.pop(first_event_time))
         elif PREV_TS + event_window_size < first_event_time:
             # emit the payload here
-            payload['image'] = PREV_IMG
+            # payload['image'] = PREV_IMG
+            payload['image_file'] = PREV_IMG_FILE
             PREV_TS = ts
-            image = Image.open(io.BytesIO(file))
-            PREV_IMG = image
+            # image = Image.open(io.BytesIO(file))
+            # PREV_IMG = image
+            PREV_IMG_FILE = file
             break
     payload['events'] = event_queue
-    # return {'image type': type(payload['image']), 'num events': len(event_queue)}
-    return {'num events': len(event_queue), 'image type': str(type(payload['image']))}
+    # syncronize operation
+    global PAYLOAD_QUEUE
+    PAYLOAD_QUEUE.append(payload)
+    while len(PAYLOAD_QUEUE) >= PAYLOAD_QUEUE_MAX_SIZE:
+        PAYLOAD_QUEUE.pop(0)
+    return {'num events of frame': len(event_queue), 'total event in queue': (len(PAYLOAD_QUEUE))}
 
+class TrainSample(BaseModel):
+    file: bytes = File(...)
+    seq: list = []
 
-
-
-
-
+@app.put("/get_one_sample/")
+async def get_one_sample():
+    item = TrainSample()
+    global PAYLOAD_QUEUE
+    last_sample = PAYLOAD_QUEUE.pop(0)
+    item.seq = last_sample['events']
+    item.file = last_sample['img_file']
+    return item
 
 @app.get("/event/")
 async def read_item(name: str, ts: float, event_type: str):
