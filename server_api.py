@@ -76,7 +76,6 @@ async def create_upload_file(ts: float, file: bytes = File(...)):
         PAYLOAD_QUEUE.pop(0)
     return {'num events of frame': len(event_queue), 'total event in queue': (len(PAYLOAD_QUEUE))}
 
-from typing import Union
 
 
 @app.put("/get_one_sample/")
@@ -84,7 +83,8 @@ def get_one_sample():
     global PAYLOAD_QUEUE
     if len(PAYLOAD_QUEUE) == 0:
         return {
-            'error': "empty queue"
+            'events': [],
+            'file': None
         }
     last_sample = PAYLOAD_QUEUE.pop(0)
     item_seq = last_sample['events']
