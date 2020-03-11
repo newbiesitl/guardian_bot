@@ -89,7 +89,7 @@ def get_one_sample():
     last_sample = PAYLOAD_QUEUE.pop(0)
     item_seq = last_sample['events']
     item_file = last_sample[FILE_PTR]
-    with tempfile.NamedTemporaryFile(mode="w+b", suffix=".png", delete=True) as FOUT:
+    with tempfile.NamedTemporaryFile(mode="w+b", suffix=".png", delete=False) as FOUT:
         FOUT.write(item_file)
         return {'events': item_seq,
                 'file': FileResponse(FOUT.name, media_type="image/png"),

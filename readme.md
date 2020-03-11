@@ -5,6 +5,7 @@
 - `conda install -c conda-forge pyautogui`
 - `pip install fastapi`
 - `pip install pillow`
+- `python-multipart`
 
 # run server
 uvicorn worker_client:app
