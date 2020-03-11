@@ -11,9 +11,9 @@ def get_one_sample():
         return None
     path = r.json()['file']['path']
     img = Image.open(path)
-    print(np.array(img).shape)
+    # print(np.array(img).shape)
     seq = r.json()['events']
-    print(r.json()['events'])
+    # print(r.json()['events'])
     return np.array(img), seq
 
 
