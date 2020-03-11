@@ -18,11 +18,22 @@ def get_one_sample():
 
 
 if __name__ == "__main__":
+    from model_factory.data_loader import tokenize_seq
     ts = 5
     ts_sample = []
+    img_seq = []
+    key_seq = []
     while True:
         sample = get_one_sample()
-        ts_sample.append(sample)
+        if sample is None:
+            print('none sample returned, repeat request')
+            continue
+        # print(sample[1])
+        img_seq.append(sample[0])
+        key_seq.append(sample[1])
         while len(ts_sample) >= ts:
-            ts_sample.pop(0)
+            img_seq.pop(0)
+            key_seq.pop(0)
             time.sleep(0.3)
+        ret = tokenize_seq(key_seq,{})
+        time.sleep(1)

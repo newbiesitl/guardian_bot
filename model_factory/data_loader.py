@@ -16,28 +16,37 @@ def load_dict(file_name):
     return json_p
 
 
-def unpack_payload(p:[], ld:{}):
+def tokenize_seq(key_seq:[], ld:{}):
     '''
     Payload is a list of two lists
     1 list is list of img array
     1 list is the list of keyboard activities
     they share the same time index
     '''
-    imgs = p[0]
-    key_seq = p[1]
     idx = 0
+    ret = []
+    # print('outer',key_seq)
     while True:
-        if idx >= len(imgs):
+        if idx >= len(key_seq):
             break
         seq = key_seq[idx]
+        # print('inner',seq)
         # tokenize seq
         for t_i in range(len(seq)):
-            t = seq[t_i]
+            key_event = seq[t_i]
+            # print(key_event)
+            t = '_'.join([key_event['name'], key_event['event_type']])
+            # print(t)
             if t in ld:
-                seq[t_i] = seq[t]
+                ret.append(ld[t])
+                # seq[t_i] = ld[t]
             else:
                 max_idx = len(list(ld.keys()))
+                # update max_idx
                 ld[t] = max_idx
                 dump_dict_to_file(ld, LOOK_UP_D_FILE_NAME)
-        key_seq[idx] = seq
-    return (imgs, key_seq)
+                ld = load_dict(LOOK_UP_D_FILE_NAME)
+        ret.append(seq)
+        # key_seq[idx] = seq
+        idx += 1
+    return ret

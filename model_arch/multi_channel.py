@@ -46,14 +46,8 @@ def seq_encoder(num_keys, seq_len, h_dim):
 
 
 
+def get_seq_model(num_keys=50, seq_len=45, h_dim=10, frames=10,):
 
-if __name__ == "__main__":
-    import numpy as np
-    # test toy model
-    num_keys = 50
-    seq_len = 45
-    h_dim = 10
-    frames = 10
     channel1_input_shape = (None, 640, 480, 3)
     channel2_input_shape = (None, seq_len, )
     channel1_seq_input = keras.layers.Input(channel1_input_shape)
@@ -69,8 +63,23 @@ if __name__ == "__main__":
     print(channel2.shape)
 
     combined = keras.layers.Concatenate()([channel1, channel2])
-    model = keras.models.Model(inputs=[channel1_seq_input, channel2_seq_input], outputs=[combined])
+    combined = keras.layers.RepeatVector(seq_len)(combined)
+    output = keras.layers.TimeDistributed(keras.layers.Dense(num_keys))(combined)
+    model = keras.models.Model(inputs=[channel1_seq_input, channel2_seq_input], outputs=[output])
     model.summary()
+    model.compile(loss=keras.losses.sparse_categorical_crossentropy, optimizer=keras.optimizers.Adam())
     # frame =
     # r_n =  np.random.uniform(0, 1, combined_input_shape)
     # m = encoder(num_keys, seq_len, h_dim, channel1_input_shape)
+    return model
+
+
+if __name__ == "__main__":
+    num_keys = 50
+    seq_len = 45
+    h_dim = 10
+    frames = 10
+    get_seq_model(num_keys = 50,
+                    seq_len = 45,
+                    h_dim = 10,
+                    frames = 10,)
