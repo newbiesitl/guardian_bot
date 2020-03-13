@@ -18,38 +18,19 @@ def img_encoder():
     m.add(keras.layers.Flatten())
     return m
 
-    # channel1 = keras.layers.Conv2D(filters=3, kernel_size=5)(input)
-    # channel1 = keras.layers.MaxPool2D()(channel1)
-    # channel1 = keras.layers.Conv2D(filters=5, kernel_size=3)(channel1)
-    # channel1 = keras.layers.MaxPool2D()(channel1)
-    # channel1 = keras.layers.Conv2D(filters=5, kernel_size=3)(channel1)
-    # channel1 = keras.layers.MaxPool2D()(channel1)
-    # channel1 = keras.layers.Conv2D(filters=7, kernel_size=3)(channel1)
-    # channel1 = keras.layers.MaxPool2D()(channel1)
-    # channel1 = keras.layers.Conv2D(filters=10, kernel_size=3)(channel1)
-    # channel1 = keras.layers.MaxPool2D()(channel1)
-    # channel1 = keras.layers.Flatten()(channel1)
-    # # model = keras.Model(inputs=[input], outputs=[channel1])
-    # return channel1
-
 def seq_encoder(num_keys, seq_len, h_dim):
     m = keras.models.Sequential()
     embedding = keras.layers.Embedding(input_dim=num_keys, output_dim=h_dim, input_length=seq_len)
     m.add(embedding)
     m.add(keras.layers.LSTM(10, return_sequences=False))
     return m
-    # print(input.shape)
-    # channel_2 = keras.layers.Embedding(input_dim=num_keys, output_dim=h_dim, input_length=seq_len)(input)
-    # channel_2 = keras.layers.LSTM(10, return_sequences=False)(channel_2)
-    # model = keras.models.Model(inputs=[input], outputs=[channel_2])
-    # return model
 
 
 
-def get_seq_model(num_keys=50, seq_len=45, h_dim=10, frames=10,):
+def get_seq_model(num_keys=50, seq_len=45, h_dim=50, frames=10,):
 
-    channel1_input_shape = (None, 640, 480, 3)
-    channel2_input_shape = (None, seq_len, )
+    channel1_input_shape = (frames, 640, 480, 3)
+    channel2_input_shape = (frames, seq_len, )
     channel1_seq_input = keras.layers.Input(channel1_input_shape)
     channel2_seq_input = keras.layers.Input(channel2_input_shape)
     i_enc = img_encoder()
@@ -66,7 +47,6 @@ def get_seq_model(num_keys=50, seq_len=45, h_dim=10, frames=10,):
     combined = keras.layers.RepeatVector(seq_len)(combined)
     output = keras.layers.TimeDistributed(keras.layers.Dense(num_keys))(combined)
     model = keras.models.Model(inputs=[channel1_seq_input, channel2_seq_input], outputs=[output])
-    model.summary()
     model.compile(loss=keras.losses.sparse_categorical_crossentropy, optimizer=keras.optimizers.Adam())
     # frame =
     # r_n =  np.random.uniform(0, 1, combined_input_shape)
@@ -79,7 +59,8 @@ if __name__ == "__main__":
     seq_len = 45
     h_dim = 10
     frames = 10
-    get_seq_model(num_keys = 50,
-                    seq_len = 45,
-                    h_dim = 10,
-                    frames = 10,)
+    model = get_seq_model(num_keys = 50,
+                        seq_len = 45,
+                        h_dim = 10,
+                        frames = 10,)
+    model.summary()

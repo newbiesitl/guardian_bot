@@ -26,14 +26,15 @@ if __name__ == "__main__":
     while True:
         sample = get_one_sample()
         if sample is None:
-            print('none sample returned, repeat request')
+            # print('none sample returned, repeat request')
             continue
         # print(sample[1])
         img_seq.append(sample[0])
         key_seq.append(sample[1])
-        while len(ts_sample) >= ts:
+        while len(img_seq) > ts:
             img_seq.pop(0)
             key_seq.pop(0)
-            time.sleep(0.3)
-        ret = tokenize_seq(key_seq,{})
-        time.sleep(1)
+        ret = tokenize_seq(key_seq, None)
+        # print(type(img_seq[0]))
+        print(ret)
+        time.sleep(.1)

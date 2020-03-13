@@ -20,14 +20,13 @@ event_left_window = -1.0
 
 od = OrderedDict()
 
-QUEUE_MAX_LEN = 100
 app = FastAPI()
 
 PREV_IMG_FILE = None
 PREV_TS = -1
 PAYLOAD_QUEUE = []
 FILE_PTR = "FILE"
-PAYLOAD_QUEUE_MAX_SIZE = 100 # 100 frames
+PAYLOAD_QUEUE_MAX_SIZE = 10 # X frames
 
 @app.post("/uploadfile/")
 async def create_upload_file(ts: float, file: bytes = File(...)):
@@ -65,7 +64,7 @@ async def create_upload_file(ts: float, file: bytes = File(...)):
     # syncronize operation
     global PAYLOAD_QUEUE
     PAYLOAD_QUEUE.append(payload)
-    while len(PAYLOAD_QUEUE) >= PAYLOAD_QUEUE_MAX_SIZE:
+    while len(PAYLOAD_QUEUE) > PAYLOAD_QUEUE_MAX_SIZE:
         PAYLOAD_QUEUE.pop(0)
     return {'num events of frame': len(event_queue), 'total event in queue': (len(PAYLOAD_QUEUE))}
 
@@ -111,7 +110,7 @@ async def read_item(name: str, ts: float, event_type: str):
         'status': 'sucess'
     }
     # pop old events
-    while len(od.items()) > QUEUE_MAX_LEN:
+    while len(od.items()) > PAYLOAD_QUEUE_MAX_SIZE:
         first_event = tuple(od.items())[0]
         first_event_time = first_event[0]
         od.pop(first_event_time)
