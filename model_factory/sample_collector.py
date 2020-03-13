@@ -16,25 +16,3 @@ def get_one_sample():
     # print(r.json()['events'])
     return np.array(img), seq
 
-
-if __name__ == "__main__":
-    from model_factory.data_loader import tokenize_seq
-    ts = 5
-    ts_sample = []
-    img_seq = []
-    key_seq = []
-    while True:
-        sample = get_one_sample()
-        if sample is None:
-            # print('none sample returned, repeat request')
-            continue
-        # print(sample[1])
-        img_seq.append(sample[0])
-        key_seq.append(sample[1])
-        while len(img_seq) > ts:
-            img_seq.pop(0)
-            key_seq.pop(0)
-        ret = tokenize_seq(key_seq, None)
-        # print(type(img_seq[0]))
-        print(ret)
-        time.sleep(.1)

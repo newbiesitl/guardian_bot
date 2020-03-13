@@ -11,7 +11,7 @@ event_url = 'http://127.0.0.1:8000/event'
 def async_screen_shot():
     try:
         start_time = time.time()
-        myScreenshot = pyautogui.screenshot().resize((640, 480))
+        myScreenshot = pyautogui.screenshot().convert('RGB').resize((640, 480))
         imgByteArr = io.BytesIO()
         myScreenshot.save(imgByteArr, format='PNG')
         imgByteArr = imgByteArr.getvalue()

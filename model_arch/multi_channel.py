@@ -29,8 +29,8 @@ def seq_encoder(num_keys, seq_len, h_dim):
 
 def get_seq_model(num_keys=50, seq_len=45, h_dim=50, frames=10,):
 
-    channel1_input_shape = (frames, 640, 480, 3)
-    channel2_input_shape = (frames, seq_len, )
+    channel1_input_shape = (None, 480, 640, 3)
+    channel2_input_shape = (None, seq_len, )
     channel1_seq_input = keras.layers.Input(channel1_input_shape)
     channel2_seq_input = keras.layers.Input(channel2_input_shape)
     i_enc = img_encoder()
@@ -38,10 +38,8 @@ def get_seq_model(num_keys=50, seq_len=45, h_dim=50, frames=10,):
 
     channel1 = keras.layers.TimeDistributed(i_enc)(channel1_seq_input)
     channel1 = keras.layers.LSTM(h_dim, return_sequences=False)(channel1)
-    print(channel1.shape)
     channel2 = keras.layers.TimeDistributed(s_enc)(channel2_seq_input)
     channel2 = keras.layers.LSTM(h_dim, return_sequences=False)(channel2)
-    print(channel2.shape)
 
     combined = keras.layers.Concatenate()([channel1, channel2])
     combined = keras.layers.RepeatVector(seq_len)(combined)
@@ -54,13 +52,3 @@ def get_seq_model(num_keys=50, seq_len=45, h_dim=50, frames=10,):
     return model
 
 
-if __name__ == "__main__":
-    num_keys = 50
-    seq_len = 45
-    h_dim = 10
-    frames = 10
-    model = get_seq_model(num_keys = 50,
-                        seq_len = 45,
-                        h_dim = 10,
-                        frames = 10,)
-    model.summary()
