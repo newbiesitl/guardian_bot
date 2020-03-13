@@ -1,15 +1,10 @@
 from fastapi import FastAPI, File, UploadFile
 from collections import OrderedDict
-from pydantic import BaseModel
 import time, io
 
 from starlette.responses import FileResponse
 from starlette.middleware.cors import CORSMiddleware
-from starlette.responses import StreamingResponse
-from typing import List
 import tempfile
-import numpy as np
-from PIL import Image
 app = FastAPI()
 app.add_middleware(
     CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"]

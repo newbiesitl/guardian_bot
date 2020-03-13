@@ -29,7 +29,7 @@ ts_sample = []
 img_seq = []
 key_seq = []
 while True:
-    sample = get_one_sample()
+    sample = get_one_sample(debug=False)
     if sample is None:
         # print('none sample returned, repeat request')
         continue
