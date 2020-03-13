@@ -8,12 +8,13 @@
 - `python-multipart`
 
 # run server
-uvicorn worker_client:app
+uvicorn run_server:app
 
 list all ports ps
-`lsof -i:8000`
+- `lsof -i:8000`
+
 kill them
-`kill -9 $(lsof -t -i:8000)`
+- `kill -9 $(lsof -t -i:8000)`
 
 # run client
 

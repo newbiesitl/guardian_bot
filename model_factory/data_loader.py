@@ -11,7 +11,7 @@ def dump_dict_to_file(d, file_name):
     f.close()
 
 def load_dict(file_name):
-    f = open(file_name, 'r')
+    f = open(file_name, 'r+')
     json_p = json.load(f)
     return json_p
 
@@ -23,6 +23,8 @@ def tokenize_seq(key_seq:[], ld:{}):
     1 list is the list of keyboard activities
     they share the same time index
     '''
+    if ld is None:
+        ld = load_dict(LOOK_UP_D_FILE_NAME)
     idx = 0
     ret = []
     # print('outer',key_seq)
