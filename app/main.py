@@ -1,4 +1,4 @@
-from fastapi import FastAPI, File, UploadFile
+from fastapi import FastAPI, File, Request
 from collections import OrderedDict
 import time, io
 
@@ -24,44 +24,47 @@ FILE_PTR = "FILE"
 PAYLOAD_QUEUE_MAX_SIZE = 10 # X frames
 
 @app.post("/uploadfile/")
-async def create_upload_file(ts: float, file: bytes = File(...)):
+async def create_upload_file(request: Request, ts: float, file: bytes = File(...)):
     global PREV_TS
     global PREV_IMG_FILE
     global od
     # pop events older than prev_ts
     event_queue = []
     payload = {}
-    if PREV_IMG_FILE is None:
-        # image = Image.open(io.BytesIO(file))
-        # PREV_IMG = image
-        PREV_IMG_FILE = file
-        # payload['image'] = image
-        payload[FILE_PTR] = file
-        return {'num events': len(event_queue), 'image type': str(type(payload[FILE_PTR]))}
-    while True:
-        if len(od) == 0:
-            payload[FILE_PTR] = PREV_IMG_FILE
-            PREV_TS = ts
+    try:
+        if PREV_IMG_FILE is None:
+            # image = Image.open(io.BytesIO(file))
+            # PREV_IMG = image
             PREV_IMG_FILE = file
-            break
-        first_event = tuple(od.items())[0]
-        first_event_time = first_event[0]
-        if first_event_time < PREV_TS:
-            od.pop(first_event_time)
-        elif PREV_TS < first_event_time < PREV_TS + event_window_size:
-            event_queue.append(od.pop(first_event_time))
-        elif PREV_TS + event_window_size < first_event_time:
-            payload[FILE_PTR] = PREV_IMG_FILE
-            PREV_TS = ts
-            PREV_IMG_FILE = file
-            break
-    payload['events'] = event_queue
-    # syncronize operation
-    global PAYLOAD_QUEUE
-    PAYLOAD_QUEUE.append(payload)
-    while len(PAYLOAD_QUEUE) > PAYLOAD_QUEUE_MAX_SIZE:
-        PAYLOAD_QUEUE.pop(0)
-    return {'num events of frame': len(event_queue), 'total event in queue': (len(PAYLOAD_QUEUE))}
+            # payload['image'] = image
+            payload[FILE_PTR] = file
+            return {'num events': len(event_queue), 'image type': str(type(payload[FILE_PTR]))}
+        while True:
+            if len(od) == 0:
+                payload[FILE_PTR] = PREV_IMG_FILE
+                PREV_TS = ts
+                PREV_IMG_FILE = file
+                break
+            first_event = tuple(od.items())[0]
+            first_event_time = first_event[0]
+            if first_event_time < PREV_TS:
+                od.pop(first_event_time)
+            elif PREV_TS < first_event_time < PREV_TS + event_window_size:
+                event_queue.append(od.pop(first_event_time))
+            elif PREV_TS + event_window_size < first_event_time:
+                payload[FILE_PTR] = PREV_IMG_FILE
+                PREV_TS = ts
+                PREV_IMG_FILE = file
+                break
+        payload['events'] = event_queue
+        # syncronize operation
+        global PAYLOAD_QUEUE
+        PAYLOAD_QUEUE.append(payload)
+        while len(PAYLOAD_QUEUE) > PAYLOAD_QUEUE_MAX_SIZE:
+            PAYLOAD_QUEUE.pop(0)
+        return {'num events of frame': len(event_queue), 'total event in queue': (len(PAYLOAD_QUEUE))}
+    except Exception as e:
+        return {"exception error": e}
 
 
 

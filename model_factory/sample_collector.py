@@ -2,7 +2,9 @@ import requests
 from PIL import Image
 import numpy as np
 import matplotlib.pyplot as plt
-url = 'http://127.0.0.1:8000/get_one_sample/'
+ip_addr = 'http://192.168.1.140'
+# ip_addr = 'http://127.0.0.1:8000'
+url = '%s/get_one_sample/' % (ip_addr)
 
 
 def get_one_sample(debug=False):

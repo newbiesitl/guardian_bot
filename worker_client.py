@@ -4,9 +4,12 @@ import asyncio
 import requests
 import subprocess, threading
 
+
+
 MAX_FPS = 5
-image_upload_url = 'http://127.0.0.1:8000/uploadfile'
-event_url = 'http://127.0.0.1:8000/event'
+ip_addr = 'http://192.168.1.140'
+image_upload_url = '%s/uploadfile' % (ip_addr)
+event_url = '%s/event' % (ip_addr)
 
 def async_screen_shot():
     try:
@@ -15,6 +18,7 @@ def async_screen_shot():
         imgByteArr = io.BytesIO()
         myScreenshot.save(imgByteArr, format='PNG')
         imgByteArr = imgByteArr.getvalue()
+        # print(type(imgByteArr))
         files = {'file': imgByteArr}
         params = {'ts': start_time}
         r = requests.post(image_upload_url, files=files, params=params)
@@ -35,7 +39,7 @@ def event_loop(fps=30, e_type='screenshot', verbose=False):
             worker = threading.Thread(target=async_screen_shot())
             worker.start()
             iter += 1
-            if iter % 100 == 0:
+            if iter % 10 == 0:
                 sub_p = subprocess.Popen(['./clean_tmp.sh'], shell=True)
                 iter = 0
                 sub_p.wait()
