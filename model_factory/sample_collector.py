@@ -18,7 +18,6 @@ def get_one_sample(debug=False):
         imageStream = io.BytesIO(r.content)
         with Image.open(imageStream) as img:
             if debug:
-                print(np.array(img).shape)
                 plt.imshow(img)
                 plt.show()
                 plt.clf()  # will make the plot window empty
@@ -28,9 +27,12 @@ def get_one_sample(debug=False):
 
 
 if __name__ == "__main__":
+    # TODO @CHARLES need to create training sample collector here
     import time
-    sample = get_one_sample(debug=True)
-
+    while True:
+        sample = get_one_sample(debug=False)
+        print(len(sample[1]))
+        # time.sleep(1)
     # while True:
     #     sample = get_one_sample(debug=True)
     #     time.sleep(1)
