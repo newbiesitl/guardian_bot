@@ -1,6 +1,8 @@
 from fastapi import FastAPI, File, Request
 from collections import OrderedDict
 import time, io
+from starlette.responses import StreamingResponse
+
 
 from starlette.responses import FileResponse
 from starlette.middleware.cors import CORSMiddleware
@@ -67,23 +69,48 @@ async def create_upload_file(request: Request, ts: float, file: bytes = File(...
         return {"exception error": e}
 
 
-
-@app.put("/get_one_sample/")
-def get_one_sample():
+@app.get("/pop_queue/")
+def get_one_event_seq():
     global PAYLOAD_QUEUE
     if len(PAYLOAD_QUEUE) == 0:
         return {
             'events': [],
             'file': None
         }
-    last_sample = PAYLOAD_QUEUE.pop(0)
+    PAYLOAD_QUEUE.pop(0)
+    return {'message': "success", "queue length": len(PAYLOAD_QUEUE)}
+
+@app.put("/get_one_event_seq/")
+async def get_one_event_seq():
+    global PAYLOAD_QUEUE
+    if len(PAYLOAD_QUEUE) == 0:
+        return {
+            'events': [],
+            'file': None
+        }
+    last_sample = PAYLOAD_QUEUE[0]
     item_seq = last_sample['events']
+    return {'events': item_seq}
+
+
+@app.put("/get_one_sample/")
+async def get_one_sample():
+    global PAYLOAD_QUEUE
+    if len(PAYLOAD_QUEUE) == 0:
+        return {
+            'events': [],
+            'file': None
+        }
+    last_sample = PAYLOAD_QUEUE[0]
     item_file = last_sample[FILE_PTR]
-    with tempfile.NamedTemporaryFile(mode="w+b", suffix=".png", delete=False) as FOUT:
-        FOUT.write(item_file)
-        return {'events': item_seq,
-                'file': FileResponse(FOUT.name, media_type="image/png"),
-                }
+    return StreamingResponse(io.BytesIO(item_file), media_type="image/png")
+
+    # with tempfile.NamedTemporaryFile(mode="w+b", suffix=".png", delete=False) as FOUT:
+    #     FOUT.write(item_file)
+    #     FOUT.name = 'tmp.png'
+    #     return {'events': item_seq,
+    #             'file': FileResponse(FOUT.name, media_type="image/png"),
+    #             }
 
 @app.get("/event/")
 async def read_item(name: str, ts: float, event_type: str):
