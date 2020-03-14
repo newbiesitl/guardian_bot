@@ -8,6 +8,7 @@ import subprocess, threading
 
 MAX_FPS = 5
 ip_addr = 'http://192.168.1.140'
+# ip_addr = 'http://127.0.0.1:8000'
 image_upload_url = '%s/uploadfile' % (ip_addr)
 event_url = '%s/event' % (ip_addr)
 
