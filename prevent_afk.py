@@ -1,12 +1,14 @@
 from pyautogui import keyDown, keyUp, press, KEYBOARD_KEYS
 import time
+import random
 print(KEYBOARD_KEYS)
+keyDown('right')
+keyUp('right')
 while True:
     try:
-        time.sleep(5)
+        time.sleep(random.randint(10,60))
         keyDown('right')
         keyUp('right')
-        time.sleep(20)
     except Exception as e:
         print(e)
         keyUp('right')
