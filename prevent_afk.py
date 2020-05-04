@@ -10,12 +10,12 @@ def reload():
         press(char)
     press('enter')
 reload_counter = 20
-
+counter_reset = 20
 while True:
     try:
         time.sleep(10)
         if reload_counter == 0:
-            reload_counter = 2
+            reload_counter = counter_reset
             reload()
         reload_counter -= 1
         # keyDown('right')
