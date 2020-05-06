@@ -25,10 +25,10 @@ while True:
         time.sleep(30)
         if reload_counter == 0:
             reload_counter = counter_reset
-            reload()
+            # reload()
         reload_counter -= 1
-        keyDown('right')
-        keyUp('right')
+        press('right')
+        press('left')
 
     except Exception as e:
         print(e)
