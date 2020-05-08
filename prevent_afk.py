@@ -18,7 +18,7 @@ movement_options = [
 ]
 
 def brown_move():
-    action_index = random.randint(0,3)
+    action_index = random.randint(0,1)
     keyDown(movement_options[action_index])
     # time.sleep(0.5)
     keyUp(movement_options[action_index])
