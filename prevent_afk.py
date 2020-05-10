@@ -22,9 +22,10 @@ movement_options = [
     "left", "right", #"up", "down"
 ]
 
-def brown_move():
+def brown_move(up_only=False):
     action_index = random.randint(0,1)
-    keyDown(movement_options[action_index])
+    if not up_only:
+        keyDown(movement_options[action_index])
     # time.sleep(0.5)
     keyUp(movement_options[action_index])
 
@@ -46,7 +47,7 @@ while True:
             reload_counter = counter_reset
             # reload()
         reload_counter -= 1
-        brown_move()
+        brown_move(up_only=True)
 
     except Exception as e:
         print(e)
