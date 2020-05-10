@@ -7,7 +7,8 @@ import os, sys
 cur_path = os.path.dirname(os.path.abspath(__file__))
 root_dir = os.path.join(cur_path, '..')
 sys.path.append(root_dir)
-from restful.bots.pally import pally_event_loop
+
+from pally import pally_event_loop
 
 time.sleep(5)
 class Item(BaseModel):
