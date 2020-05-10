@@ -51,6 +51,6 @@ while True:
 
     except Exception as e:
         print(e)
-        keyUp('right')
+        keyUp('{')
         time.sleep(1)
         continue
