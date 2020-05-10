@@ -58,3 +58,10 @@ async def get_state(item: Item):
     return j_load
 
 
+
+@app.post("/action/", status_code=200)
+async def perform_action(item: Item):
+    json_body = item.body
+    j_load = json.loads(json_body)
+    event_loop(j_load)
+    return j_load
