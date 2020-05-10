@@ -38,10 +38,10 @@ reload_counter = 20
 counter_reset = 30
 time.sleep(5)
 # send_message('Warag', 'test started')
-
+brown_move()
 while True:
     try:
-        time.sleep(10)
+        time.sleep(30)
         if reload_counter == 0:
             reload_counter = counter_reset
             # reload()
