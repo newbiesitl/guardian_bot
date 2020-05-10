@@ -1,6 +1,8 @@
 from pyautogui import keyDown, keyUp, press, KEYBOARD_KEYS
 import time
 import random
+import pyautogui
+pyautogui.FAILSAFE = False
 print(KEYBOARD_KEYS)
 
 '''
