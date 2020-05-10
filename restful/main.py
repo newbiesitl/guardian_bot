@@ -26,6 +26,9 @@ def heal_self():
     press('left')
     press('2')
 
+def cleanse():
+    press('y')
+
 def mount():
     press('-')
 
@@ -47,7 +50,9 @@ def event_loop(state):
     elif not state['targetInCombat'] and previous_state_in_combat:
         mount()
     else:
+        press('7') # cleanse self
         follow_target()
+        cleanse()
     previous_state_in_combat = state['targetInCombat']
 
 app = FastAPI()
