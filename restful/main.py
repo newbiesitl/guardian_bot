@@ -8,7 +8,7 @@ cur_path = os.path.dirname(os.path.abspath(__file__))
 root_dir = os.path.join(cur_path, '..')
 sys.path.append(root_dir)
 
-from pally import pally_event_loop
+from bots.pally import pally_event_loop
 
 time.sleep(5)
 class Item(BaseModel):
