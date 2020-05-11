@@ -1,9 +1,10 @@
 from fastapi import FastAPI
 from pydantic import BaseModel
 import json
+import numpy as np
 from pyautogui import press
-import time
-import os, sys
+import time, os, sys
+import random
 cur_path = os.path.dirname(os.path.abspath(__file__))
 root_dir = os.path.join(cur_path, '..')
 sys.path.append(root_dir)
@@ -25,6 +26,10 @@ previous_state_in_combat = False
 
 app = FastAPI()
 menu = None
+
+on_follow = False
+on_standby = False
+previous_state = None
 @app.post("/state/", status_code=200)
 async def get_state(item: Item):
     json_body = item.body
@@ -67,13 +72,118 @@ async def get_state(item: Item):
     return j_load
 
 
+def handle_movement_states(state):
+    global previous_state
+    global previous_state_in_combat
+
+    if on_follow:
+        follow_captain()
+    if on_standby:
+        if previous_state == 'follow':
+            standby()
+        elif not state['targetInCombat'] and previous_state_in_combat:
+            mount()
+        else:
+            pass
+
+def party_idx_to_target(idx):
+    if idx == 0:
+        press('f1')
+    elif idx == 1:
+        press('f2')
+    elif idx == 2:
+        press('f3')
+    elif idx == 3:
+        press('f4')
+    elif idx == 4:
+        press('f5')
+    else:
+        print('invalid party index %d' % (idx))
+        pass
+
+def druid_heal_target_seq(health_percentage, conditions):
+    action_performed = False
+    global on_follow
+    if conditions[2] == 1:
+        if conditions[0] == 0 and health_percentage <= 0.90:
+            press('3')
+            action_performed = True
+        elif conditions[1] == 0 and health_percentage <= 0.6:
+            standby()
+            press('2')
+            action_performed = True
+        elif health_percentage <= 0.80:
+            standby()
+            press('4')
+            action_performed = True
+        else:
+            pass
+    return action_performed
+
+
+def lowest_first(state):
+    def string_pair_to_perc(n, dn):
+        print('current %d, max %d' % (n, dn))
+        return float(n)/(float(dn))
+
+    heal_conditions = [
+        (state['player_RejuvenationActive'],state['player_Regrowth'], 1), # self always within 40 yd
+        (state['party1_RejuvenationActive'],state['party1_Regrowth'], state['is_party1_within_40_yard']),
+        (state['party2_RejuvenationActive'],state['party2_Regrowth'], state['is_party2_within_40_yard']),
+        (state['party3_RejuvenationActive'],state['party3_Regrowth'], state['is_party3_within_40_yard']),
+        (state['party4_RejuvenationActive'],state['party4_Regrowth'], state['is_party4_within_40_yard']),
+    ]
+    party_percentage = [
+        float(state['health']) / 100,
+        string_pair_to_perc(state['party1_current_health'], state['party1_max_health']) if heal_conditions[1][2] else 1,
+        string_pair_to_perc(state['party2_current_health'], state['party2_max_health']) if heal_conditions[2][2] else 1,
+        string_pair_to_perc(state['party3_current_health'], state['party3_max_health']) if heal_conditions[3][2] else 1,
+        string_pair_to_perc(state['party4_current_health'], state['party4_max_health']) if heal_conditions[4][2] else 1,
+        ]
+    print(party_percentage)
+    lowest_index = np.argmin(party_percentage)
+    if party_percentage[lowest_index] >= 1:
+        return False
+    lowest_conditions = heal_conditions[lowest_index]
+    party_idx_to_target(lowest_index)
+    return druid_heal_target_seq(party_percentage[lowest_index], lowest_conditions)
+
+def healing_priority_queue(state):
+    return lowest_first(state)
+
+
+
+def druid_event_loop(state):
+    global previous_state_in_combat
+    action_performed = healing_priority_queue(state)
+    if not action_performed:
+        handle_movement_states(state)
+    previous_state_in_combat = state['targetInCombat']
+
+
 
 @app.post("/action/", status_code=200)
 def perform_action(item: Item):
     json_body = item.body
     j_load = json.loads(json_body)
+    global on_follow
+    global on_standby
+    global previous_state
+    previous_state = 'follow' if on_follow else "standby"
+    on_follow = True if int(j_load['follow_hook']) == 1 else False
+    on_standby = True if int(j_load['standby_hook']) == 1 else False
+    druid_event_loop(j_load)
     # pally_event_loop(j_load)
     return j_load
+
+
+def follow_captain():
+    press("f2")
+    press(",")
+
+def standby():
+    pool = ['left', 'right']
+    press(pool[random.randint(0, 1)])
 
 
 def pally_event_loop(state):
