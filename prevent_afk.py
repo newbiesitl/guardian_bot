@@ -35,7 +35,7 @@ def send_message(char_id, msg):
     for char in msg:
         press(char)
     press('enter')
-reload_counter = 20
+reload_counter = 100
 counter_reset = 30
 time.sleep(5)
 # send_message('Warag', 'test started')
@@ -45,7 +45,7 @@ while True:
         time.sleep(30)
         if reload_counter == 0:
             reload_counter = counter_reset
-            # reload()
+            reload()
         reload_counter -= 1
         brown_move(up_only=True)
 
