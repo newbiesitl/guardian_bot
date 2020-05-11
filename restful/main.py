@@ -34,21 +34,27 @@ async def get_state(item: Item):
     mana: %s, %s%s
     health: %s, %s%s
     target: %s
-    is RejuvenationActive: %s
     party1 health: %d/%d
+    party1 RejuvenationActive %s RegrowthActive %s
     party2 health: %d/%d
+    party2 RejuvenationActive %s RegrowthActive %s
     party3 health: %d/%d
+    party3 RejuvenationActive %s RegrowthActive %s
     party4 health: %d/%d
+    party4 RejuvenationActive %s RegrowthActive %s
     """ % (
         j_load['playerInCombat'],
         j_load['manaCurrent'], '%', j_load['mana'],
         j_load['healthCurrent'], '%', j_load['health'],
         j_load['target'],
-        j_load['RejuvenationActive'],
         float(j_load['party1_current_health']),float(j_load['party1_max_health']),
+        float(j_load['party1_RejuvenationActive']),float(j_load['party1_Regrowth']),
         float(j_load['party2_current_health']),float(j_load['party2_max_health']),
+        float(j_load['party2_RejuvenationActive']),float(j_load['party2_Regrowth']),
         float(j_load['party3_current_health']),float(j_load['party3_max_health']),
+        float(j_load['party3_RejuvenationActive']),float(j_load['party3_Regrowth']),
         float(j_load['party4_current_health']),float(j_load['party4_max_health']),
+        float(j_load['party4_RejuvenationActive']), float(j_load['party4_Regrowth']),
     ))
     global menu
     if menu is None:
