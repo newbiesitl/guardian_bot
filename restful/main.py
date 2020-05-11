@@ -48,13 +48,13 @@ async def get_state(item: Item):
         j_load['healthCurrent'], '%', j_load['health'],
         j_load['target'],
         float(j_load['party1_current_health']),float(j_load['party1_max_health']),
-        float(j_load['party1_RejuvenationActive']),float(j_load['party1_Regrowth']),
+        j_load['party1_RejuvenationActive'],j_load['party1_Regrowth'],
         float(j_load['party2_current_health']),float(j_load['party2_max_health']),
-        float(j_load['party2_RejuvenationActive']),float(j_load['party2_Regrowth']),
+        j_load['party2_RejuvenationActive'],j_load['party2_Regrowth'],
         float(j_load['party3_current_health']),float(j_load['party3_max_health']),
-        float(j_load['party3_RejuvenationActive']),float(j_load['party3_Regrowth']),
+        j_load['party3_RejuvenationActive'],j_load['party3_Regrowth'],
         float(j_load['party4_current_health']),float(j_load['party4_max_health']),
-        float(j_load['party4_RejuvenationActive']), float(j_load['party4_Regrowth']),
+        j_load['party4_RejuvenationActive'],j_load['party4_Regrowth'],
     ))
     global menu
     if menu is None:
