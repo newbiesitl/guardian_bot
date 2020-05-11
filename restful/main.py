@@ -35,26 +35,26 @@ async def get_state(item: Item):
     health: %s, %s%s
     target: %s
     party1 health: %d/%d
-    party1 RejuvenationActive %s RegrowthActive %s
-    party2 health: %d/%d
-    party2 RejuvenationActive %s RegrowthActive %s
+    party1 RejuvenationActive %s RegrowthActive %s within 40 yard %s
+    party2 health: %d/%d 
+    party2 RejuvenationActive %s RegrowthActive %s within 40 yard %s
     party3 health: %d/%d
-    party3 RejuvenationActive %s RegrowthActive %s
+    party3 RejuvenationActive %s RegrowthActive %s within 40 yard %s
     party4 health: %d/%d
-    party4 RejuvenationActive %s RegrowthActive %s
+    party4 RejuvenationActive %s RegrowthActive %s within 40 yard %s
     """ % (
         j_load['playerInCombat'],
         j_load['manaCurrent'], '%', j_load['mana'],
         j_load['healthCurrent'], '%', j_load['health'],
         j_load['target'],
         float(j_load['party1_current_health']),float(j_load['party1_max_health']),
-        j_load['party1_RejuvenationActive'],j_load['party1_Regrowth'],
+        j_load['party1_RejuvenationActive'],j_load['party1_Regrowth'], j_load['is_party1_within_40_yard'],
         float(j_load['party2_current_health']),float(j_load['party2_max_health']),
-        j_load['party2_RejuvenationActive'],j_load['party2_Regrowth'],
+        j_load['party2_RejuvenationActive'],j_load['party2_Regrowth'], j_load['is_party2_within_40_yard'],
         float(j_load['party3_current_health']),float(j_load['party3_max_health']),
-        j_load['party3_RejuvenationActive'],j_load['party3_Regrowth'],
+        j_load['party3_RejuvenationActive'],j_load['party3_Regrowth'], j_load['is_party3_within_40_yard'],
         float(j_load['party4_current_health']),float(j_load['party4_max_health']),
-        j_load['party4_RejuvenationActive'],j_load['party4_Regrowth'],
+        j_load['party4_RejuvenationActive'],j_load['party4_Regrowth'], j_load['is_party4_within_40_yard'],
     ))
     global menu
     if menu is None:
@@ -77,7 +77,7 @@ def pally_event_loop(state):
     check_target()
     health = int(state['targetHealth'])
     max_health = int(state['targetHealthMax'])
-    if max_health == 0:
+    if max_health <= 0:
         follow_target()
     print('target combat', state['targetInCombat'])
     print('targetHealth  percentage %d/%d' % (state['targetHealth'], state['targetHealthMax']))
