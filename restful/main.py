@@ -42,6 +42,8 @@ async def get_state(item: Item):
     party3 RejuvenationActive %s RegrowthActive %s within 40 yard %s
     party4 health: %d/%d
     party4 RejuvenationActive %s RegrowthActive %s within 40 yard %s
+    follow: %s
+    stand by: %d
     """ % (
         j_load['playerInCombat'],
         j_load['manaCurrent'], '%', j_load['mana'],
@@ -55,6 +57,8 @@ async def get_state(item: Item):
         j_load['party3_RejuvenationActive'],j_load['party3_Regrowth'], j_load['is_party3_within_40_yard'],
         float(j_load['party4_current_health']),float(j_load['party4_max_health']),
         j_load['party4_RejuvenationActive'],j_load['party4_Regrowth'], j_load['is_party4_within_40_yard'],
+        j_load['follow_hook'],
+        j_load['standby_hook'],
     ))
     global menu
     if menu is None:
@@ -68,7 +72,7 @@ async def get_state(item: Item):
 def perform_action(item: Item):
     json_body = item.body
     j_load = json.loads(json_body)
-    pally_event_loop(j_load)
+    # pally_event_loop(j_load)
     return j_load
 
 
