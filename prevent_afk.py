@@ -36,7 +36,7 @@ def send_message(char_id, msg):
         press(char)
     press('enter')
 reload_counter = 100
-counter_reset = 30
+counter_reset = 100
 time.sleep(5)
 # send_message('Warag', 'test started')
 brown_move()
