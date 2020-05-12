@@ -31,6 +31,7 @@ on_follow = False
 on_standby = False
 on_guard = False
 previous_state = None
+mounting = False
 @app.post("/state/", status_code=200)
 async def get_state(item: Item):
     json_body = item.body
@@ -79,15 +80,22 @@ def handle_movement_states(state):
     global on_follow
     global on_standby
     global on_guard
+    global mounting
     if on_standby:
         return
-    if on_follow:
+    if on_follow and not mounting:
         follow_captain()
     if on_guard:
-        if previous_state == 'follow':
+        if previous_state != "on_guard":
             cancel_follow()
         else:
             pass
+    print(state['mountable'], mounting)
+    if state['mountable'] and not state['playerInCombat'] and not mounting:
+        mounting = True
+        mount()
+        time.sleep(3.5)
+        mounting = False
 
 def party_idx_to_target(idx):
     if idx == 0:
@@ -125,7 +133,6 @@ def druid_heal_target_seq(health_percentage, conditions):
 
 def lowest_first(state):
     def string_pair_to_perc(n, dn):
-        print('current %d, max %d' % (n, dn))
         return float(n)/(float(dn))
 
     heal_conditions = [
