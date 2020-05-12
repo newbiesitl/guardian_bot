@@ -29,6 +29,7 @@ menu = None
 
 on_follow = False
 on_standby = False
+on_guard = False
 previous_state = None
 @app.post("/state/", status_code=200)
 async def get_state(item: Item):
@@ -75,14 +76,16 @@ async def get_state(item: Item):
 def handle_movement_states(state):
     global previous_state
     global previous_state_in_combat
-
+    global on_follow
+    global on_standby
+    global on_guard
+    if on_standby:
+        return
     if on_follow:
         follow_captain()
-    if on_standby:
+    if on_guard:
         if previous_state == 'follow':
-            standby()
-        elif not state['targetInCombat'] and previous_state_in_combat:
-            mount()
+            cancel_follow()
         else:
             pass
 
@@ -103,17 +106,16 @@ def party_idx_to_target(idx):
 
 def druid_heal_target_seq(health_percentage, conditions):
     action_performed = False
-    global on_follow
     if conditions[2] == 1:
         if conditions[0] == 0 and health_percentage <= 0.90:
             press('3')
             action_performed = True
         elif conditions[1] == 0 and health_percentage <= 0.6:
-            standby()
+            cancel_follow()
             press('2')
             action_performed = True
         elif health_percentage <= 0.80:
-            standby()
+            cancel_follow()
             press('4')
             action_performed = True
         else:
@@ -155,6 +157,9 @@ def healing_priority_queue(state):
 
 def druid_event_loop(state):
     global previous_state_in_combat
+    global on_standby
+    if on_standby:
+        return
     action_performed = healing_priority_queue(state)
     if not action_performed:
         handle_movement_states(state)
@@ -169,9 +174,11 @@ def perform_action(item: Item):
     global on_follow
     global on_standby
     global previous_state
-    previous_state = 'follow' if on_follow else "standby"
+    global on_guard
+    previous_state = 'follow' if on_follow else ("standby" if on_standby else "guard")
     on_follow = True if int(j_load['follow_hook']) == 1 else False
     on_standby = True if int(j_load['standby_hook']) == 1 else False
+    on_guard = True if int(j_load['guard_hook']) == 1 else False
     druid_event_loop(j_load)
     # pally_event_loop(j_load)
     return j_load
@@ -181,7 +188,7 @@ def follow_captain():
     press("f2")
     press(",")
 
-def standby():
+def cancel_follow():
     pool = ['left', 'right']
     press(pool[random.randint(0, 1)])
 

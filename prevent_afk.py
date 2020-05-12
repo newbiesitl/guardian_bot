@@ -47,7 +47,7 @@ while True:
             reload_counter = counter_reset
             reload()
         reload_counter -= 1
-        brown_move(up_only=True)
+        keyUp('{')
 
     except Exception as e:
         print(e)
