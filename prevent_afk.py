@@ -45,7 +45,7 @@ while True:
         time.sleep(30)
         if reload_counter == 0:
             reload_counter = counter_reset
-            reload()
+            # reload()
         reload_counter -= 1
         keyUp('{')
 
