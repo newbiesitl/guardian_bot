@@ -19,15 +19,28 @@ def reload():
 
 
 movement_options = [
-    "left", "right", #"up", "down"
+    "left", "right", "up", "down", None, None, None, None
 ]
 
 def brown_move(up_only=False):
-    action_index = random.randint(0,1)
+    action_index = random.randint(0, 7)
+    second_action_index = random.randint(0,7)
+    first_action = movement_options[action_index]
+    second_action = movement_options[second_action_index]
+    print(first_action, second_action)
     if not up_only:
-        keyDown(movement_options[action_index])
-    # time.sleep(0.5)
-    keyUp(movement_options[action_index])
+        if first_action is not None:
+            keyDown(first_action)
+        if second_action is not None:
+            keyDown(second_action)
+
+    if random.randint(0, 10) < 3:
+        press('space')
+    time.sleep(random.uniform(0, 1))
+    if first_action is not None:
+        keyUp(first_action)
+    if second_action is not None:
+        keyUp(second_action)
 
 def send_message(char_id, msg):
     press('enter')
@@ -35,19 +48,19 @@ def send_message(char_id, msg):
     for char in msg:
         press(char)
     press('enter')
-reload_counter = 100
-counter_reset = 100
+reload_counter = 10*70
+counter_reset = reload_counter
 time.sleep(5)
 # send_message('Warag', 'test started')
 brown_move()
 while True:
     try:
-        time.sleep(30)
+        time.sleep(random.uniform(0, 1))
         if reload_counter == 0:
             reload_counter = counter_reset
-            # reload()
+            reload()
         reload_counter -= 1
-        brown_move()
+        brown_move(up_only=True)
 
     except Exception as e:
         print(e)
