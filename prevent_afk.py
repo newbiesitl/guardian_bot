@@ -36,6 +36,7 @@ def brown_move(up_only=False):
 
     if random.randint(0, 10) < 3:
         press('space')
+        # keyUp('space')
     time.sleep(random.uniform(0, 1))
     if first_action is not None:
         keyUp(first_action)
@@ -48,7 +49,7 @@ def send_message(char_id, msg):
     for char in msg:
         press(char)
     press('enter')
-reload_counter = 10*70
+reload_counter = 120*60
 counter_reset = reload_counter
 time.sleep(5)
 # send_message('Warag', 'test started')
