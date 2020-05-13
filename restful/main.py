@@ -30,6 +30,7 @@ menu = None
 on_follow = False
 on_standby = False
 on_guard = False
+assist_commend_received = False
 previous_state = None
 mounting = False
 @app.post("/state/", status_code=200)
@@ -112,6 +113,16 @@ def party_idx_to_target(idx):
         print('invalid party index %d' % (idx))
         pass
 
+
+
+assist_spell1_res = False
+assist_spell2_res = False
+assist_spell3_res = False
+
+def druid_assist_target_seq():
+    if assist_commend_received and not (assist_spell1_res or assist_spell2_res or assist_spell3_res):
+        pass
+
 def druid_heal_target_seq(health_percentage, conditions):
     action_performed = False
     if conditions[2] == 1:
@@ -182,6 +193,9 @@ def perform_action(item: Item):
     global on_standby
     global previous_state
     global on_guard
+    global assist_commend_received
+    # update global vars to reflect state
+    assist_commend_received = True if int(j_load['assist_hook']) == 1 else False
     previous_state = 'follow' if on_follow else ("standby" if on_standby else "guard")
     on_follow = True if int(j_load['follow_hook']) == 1 else False
     on_standby = True if int(j_load['standby_hook']) == 1 else False
