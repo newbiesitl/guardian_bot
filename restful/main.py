@@ -22,7 +22,6 @@ class Item(BaseModel):
 def mount():
     press('-')
 
-previous_state_in_combat = False
 
 app = FastAPI()
 menu = None
@@ -75,9 +74,8 @@ async def get_state(item: Item):
     return j_load
 
 
-def handle_movement_states(state):
+def handle_movement_events(state):
     global previous_state
-    global previous_state_in_combat
     global on_follow
     global on_standby
     global on_guard
@@ -118,14 +116,32 @@ def party_idx_to_target(idx):
 assist_spell1_res = False
 assist_spell2_res = False
 assist_spell3_res = False
-
+assist_spell_res_list = [
+    False, False, False
+]
+assist_keys = [
+    '', '', ''
+]
 def druid_assist_target_seq():
-    if assist_commend_received and not (assist_spell1_res or assist_spell2_res or assist_spell3_res):
-        pass
+    global assist_commend_received, assist_spell1_res, assist_spell2_res, assist_spell3_res
+    # set state
+    if assist_commend_received and sum(assist_spell_res_list) <= 0:
+        assist_spell3_res, assist_spell2_res, assist_spell1_res = True, True, True
+        assist_commend_received = False
+    for action_idx in range(len(assist_spell_res_list)):
+        # make decision
+        if assist_spell_res_list[action_idx]:
+            cancel_follow()
+            press(assist_keys[action_idx])
+            time.sleep(0.3)
+            assist_spell_res_list[action_idx] = False
+
+    # how to make sure on follow won't break casting? use state to block follow events
 
 def druid_heal_target_seq(health_percentage, conditions):
     action_performed = False
     if conditions[2] == 1:
+        # health percentage is real time feedback
         if conditions[0] == 0 and health_percentage <= 0.90:
             press('3')
             action_performed = True
@@ -174,14 +190,12 @@ def healing_priority_queue(state):
 
 
 def druid_event_loop(state):
-    global previous_state_in_combat
     global on_standby
     if on_standby:
         return
     action_performed = healing_priority_queue(state)
     if not action_performed:
-        handle_movement_states(state)
-    previous_state_in_combat = state['targetInCombat']
+        handle_movement_events(state)
 
 
 
@@ -193,9 +207,10 @@ def perform_action(item: Item):
     global on_standby
     global previous_state
     global on_guard
-    global assist_commend_received
+    global assist_commend_received, assist_spell1_res, assist_spell2_res, assist_spell3_res
     # update global vars to reflect state
-    assist_commend_received = True if int(j_load['assist_hook']) == 1 else False
+    if not (assist_commend_received or assist_spell3_res or assist_spell2_res or assist_spell1_res):
+        assist_commend_received = True if int(j_load['assist_hook']) == 1 else False
     previous_state = 'follow' if on_follow else ("standby" if on_standby else "guard")
     on_follow = True if int(j_load['follow_hook']) == 1 else False
     on_standby = True if int(j_load['standby_hook']) == 1 else False
@@ -215,7 +230,6 @@ def cancel_follow():
 
 
 def pally_event_loop(state):
-    global previous_state_in_combat
     check_target()
     health = int(state['targetHealth'])
     max_health = int(state['targetHealthMax'])
@@ -227,13 +241,10 @@ def pally_event_loop(state):
         heal_target()
     elif float(state['health'])/100 < 0.85:
         heal_self()
-    elif not state['targetInCombat'] and previous_state_in_combat:
-        mount()
     else:
         press('7') # cleanse self
         follow_target()
         cleanse()
-    previous_state_in_combat = state['targetInCombat']
 
 
 def check_target():
