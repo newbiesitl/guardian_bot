@@ -23,8 +23,8 @@ movement_options = [
 ]
 
 def brown_move(up_only=False, jump=False):
-    action_index = random.randint(0, 7)
-    second_action_index = random.randint(0,7)
+    action_index = random.randint(0, 1)
+    second_action_index = random.randint(0,1)
     first_action = movement_options[action_index]
     second_action = movement_options[second_action_index]
     print(first_action, second_action)
@@ -35,8 +35,10 @@ def brown_move(up_only=False, jump=False):
             keyDown(second_action)
 
     if random.randint(0, 10) < 3 and jump:
-        press('space')
-        # keyUp('space')
+        if not up_only:
+            press('space')
+        else:
+            keyUp('space')
     time.sleep(random.uniform(0, 1))
     if first_action is not None:
         keyUp(first_action)
@@ -59,9 +61,9 @@ while True:
         time.sleep(random.uniform(0, 1))
         if reload_counter == 0:
             reload_counter = counter_reset
-            reload()
+            # reload()
         reload_counter -= 1
-        brown_move(up_only=False)
+        brown_move(up_only=True)
 
     except Exception as e:
         print(e)
