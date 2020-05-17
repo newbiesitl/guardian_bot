@@ -19,12 +19,12 @@ def reload():
 
 
 movement_options = [
-    "left", "right", "up", "down", None, None, None, None
+    "[", "]", "left", "right", "up", "down", None, None, None, None
 ]
 
 def brown_move(up_only=False, jump=False):
     action_index = random.randint(0, 1)
-    second_action_index = random.randint(0,1)
+    second_action_index = random.randint(0, 1)
     first_action = movement_options[action_index]
     second_action = movement_options[second_action_index]
     print(first_action, second_action)
