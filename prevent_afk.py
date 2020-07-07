@@ -19,10 +19,24 @@ def reload():
 
 
 movement_options = [
-    "[", "]", "left", "right", "up", "down", None, None, None, None
+    "w", "a", "d", "s"
 ]
 
-def brown_move(up_only=False, jump=False):
+
+
+def destiny_shot():
+    time.sleep(random.uniform(1 ,5))
+    key_idx = random.randint(0,3)
+    key_to_press = movement_options[key_idx]
+    keyDown(key_to_press)
+    time.sleep(1)
+    keyUp(key_to_press)
+    pyautogui.mouseDown()
+    time.sleep(random.randint(1, 5))
+    pyautogui.mouseUp()
+
+
+def brown_move(up_only=True, jump=False):
     action_index = random.randint(0, 1)
     second_action_index = random.randint(0, 1)
     first_action = movement_options[action_index]
@@ -45,25 +59,13 @@ def brown_move(up_only=False, jump=False):
     if second_action is not None:
         keyUp(second_action)
 
-def send_message(char_id, msg):
-    press('enter')
-    msg = '/w %s %s' % (char_id, msg)
-    for char in msg:
-        press(char)
-    press('enter')
+
 reload_counter = 120*60
 counter_reset = reload_counter
-time.sleep(5)
 # send_message('Warag', 'test started')
-brown_move()
 while True:
     try:
-        time.sleep(random.uniform(0, 1))
-        if reload_counter == 0:
-            reload_counter = counter_reset
-            # reload()
-        reload_counter -= 1
-        brown_move(up_only=True)
+        destiny_shot()
 
     except Exception as e:
         print(e)
