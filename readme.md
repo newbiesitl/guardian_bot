@@ -7,6 +7,12 @@
 - `pip install pillow`
 - `pip install python-multipart`
 
+
+# multi boxing tools
+## key boardcasting
+- Keyclone
+https://solidice.com/downloads/windows/keyclone
+
 # run server
 `cd app && uvicorn main:app && cd -`
 
